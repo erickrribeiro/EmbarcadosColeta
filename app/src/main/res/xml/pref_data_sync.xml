@@ -1,0 +1,10 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <Preference
+        android:key="editTextPrefModel"
+        android:title="@string/pref_title_model_device"
+    />
+    <Preference
+        android:key="editTextPrefManutecturer"
+        android:title="@string/pref_title_manufacturer_device"
+    />
+</PreferenceScreen>
