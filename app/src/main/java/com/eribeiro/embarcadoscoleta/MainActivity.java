@@ -302,6 +302,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
                         if(bytesAvailable > 0)
                         {
+
                             byte[] packetBytes = new byte[bytesAvailable];
 
                             leitor.read(packetBytes);
@@ -310,6 +311,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
                                 byte b = packetBytes[i];
                                 if(b == delimiter)
                                 {
+
                                     byte[] encodedBytes = new byte[readBufferPosition];
                                     System.arraycopy(readBuffer, 0, encodedBytes, 0, encodedBytes.length);
                                     final String data = new String(encodedBytes, "US-ASCII");
@@ -322,11 +324,12 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
                                             TextView textView = (TextView) MainActivity.activity.findViewById(R.id.txt_dado);
                                             textView.setText(data);
-
+                                            Log.d("Teste", data);
+                                            String linha = (data.replace("\n", ""))+ ", " +MainActivity.rotulo+ "\n";
                                             try {
 
                                                 if (fileLogManager.isTodosAtivos()) {
-                                                    fileLogManager.insereValoresTodosSensores(data);
+                                                    fileLogManager.insereValoresTodosSensores(linha);
                                                 }
                                             }catch(Exception e){
                                                 Log.d("ERRO", "erro em escrever acelerometro" + e.getMessage());

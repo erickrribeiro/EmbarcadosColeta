@@ -40,7 +40,7 @@ public class FileLogManager {
         int segundos = calendario.get(Calendar.SECOND);
 
         experimento = String.valueOf(ano) + "_" + String.valueOf(mes) + "_" + String.valueOf(dia) + "_" +
-                String.valueOf(hora) + ":" + String.valueOf(minuto) + ":" + String.valueOf(segundos);
+                String.valueOf(hora) + "-" + String.valueOf(minuto) + "-" + String.valueOf(segundos);
 
     }
 //CRIA ARQUIVO .CSV COMO TODOS OS SENSORES
@@ -64,7 +64,7 @@ public class FileLogManager {
             Log.d(TAG, "Todos os sensores criado com sucesso\n");
 
 
-            colunas = "x1, y1, z1,x2, y2, z2, Label \n";
+            colunas = "x1, y1, z1, orientacao1, x2, y2, z2, orientacao2, Label \n";
             arqCompleto.write(colunas.getBytes());
             arqCompleto.flush();
 

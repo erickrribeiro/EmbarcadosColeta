@@ -168,7 +168,7 @@ public class AudioManagerCostumizado {
                     Log.d("Servidor","File Upload Completed.\n\n See uploaded file here : \n\n"
                             + IP+"/progweb/uploads/" );
                 }
-                mBuilder.setContentText("Download completo")
+                mBuilder.setContentText("Upload completo")
                         .setProgress(100, 100, false);
                 mNotifyManager.notify(id, mBuilder.build());
 
