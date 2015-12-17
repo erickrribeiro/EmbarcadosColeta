@@ -95,8 +95,10 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
     /**
      * Variável utilizada na alteração do UI dentro do Runable.
      */
+
     public static Activity activity;
-    public FileLogManager fileLogManager;
+    public  FileLogManager fileLogManager;
+    private String data;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -314,7 +316,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
                                     byte[] encodedBytes = new byte[readBufferPosition];
                                     System.arraycopy(readBuffer, 0, encodedBytes, 0, encodedBytes.length);
-                                    final String data = new String(encodedBytes, "US-ASCII");
+                                    data = new String(encodedBytes, "US-ASCII");
                                     readBufferPosition = 0;
 
                                     handler.post(new Runnable()
@@ -325,7 +327,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
                                             TextView textView = (TextView) MainActivity.activity.findViewById(R.id.txt_dado);
                                             textView.setText(data);
                                             Log.d("Teste", data);
-                                            String linha = (data.replace("\n", ""))+ ", " +MainActivity.rotulo+ "\n";
+                                            String linha = data.replace("\n", "")+ ", " +MainActivity.rotulo+ "\n";
                                             try {
 
                                                 if (fileLogManager.isTodosAtivos()) {
