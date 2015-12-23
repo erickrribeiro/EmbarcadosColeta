@@ -79,8 +79,8 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
     /**
      * Armazena o nome do Bluetooth
      */
-
     private static final String NOMEBLUETOOTH = "EPA07";
+
     private static final String MENSAGEM_ATIVACAO = "1";
     private static final String MENSAGEM_DESATIVACAO = "0";
 
@@ -97,12 +97,17 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
      */
 
     public static Activity activity;
-    public  FileLogManager fileLogManager;
+    public static FileLogManager fileLogManager;
     private String data;
+    private SharedPreferences sharedPreferences;
+    private SharedPreferences.Editor editor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        sharedPreferences = getPreferences(Context.MODE_PRIVATE);
+
         setContentView(R.layout.activity_main);
 
         /**
@@ -284,8 +289,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         }
     }
 
-    void beginListenForData()
-    {
+    void beginListenForData(){
         final Handler handler = new Handler();
         final byte delimiter = 10; //This is the ASCII code for a newline character
 
@@ -313,7 +317,6 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
                                 byte b = packetBytes[i];
                                 if(b == delimiter)
                                 {
-
                                     byte[] encodedBytes = new byte[readBufferPosition];
                                     System.arraycopy(readBuffer, 0, encodedBytes, 0, encodedBytes.length);
                                     data = new String(encodedBytes, "US-ASCII");
@@ -324,17 +327,16 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
                                         public void run()
                                         {
 
-                                            TextView textView = (TextView) MainActivity.activity.findViewById(R.id.txt_dado);
-                                            textView.setText(data);
-                                            Log.d("Teste", data);
+                                            //TextView textView = (TextView) MainActivity.activity.findViewById(R.id.txt_dado);
+                                            //textView.setText(data);
+                                            //Log.d("Teste", data);
                                             String linha = data.replace("\n", "")+ ", " +MainActivity.rotulo+ "\n";
                                             try {
 
-                                                if (fileLogManager.isTodosAtivos()) {
-                                                    fileLogManager.insereValoresTodosSensores(linha);
-                                                }
+                                                fileLogManager.insereValoresTodosSensores(linha);
+
                                             }catch(Exception e){
-                                                Log.d("ERRO", "erro em escrever acelerometro" + e.getMessage());
+                                                Log.d("ERRO", "erro em escrever acelerometro: " + e.getMessage());
                                             }
 
                                         }
@@ -380,61 +382,60 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
     @Override
     public void onClick(View view) {
-        SharedPreferences sharedPreferences = getPreferences(Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor;
-
         switch (view.getId()){
             case R.id.play:
-                editor = sharedPreferences.edit();
-                editor.putBoolean("prefAtivo", true);
-                editor.commit();
+                if(conectado) {
+                    editor = sharedPreferences.edit();
+                    editor.putBoolean("prefAtivo", true);
+                    editor.commit();
 
-                /**
-                 * inicia conexao com os dados do Sensor
-                 */
+                    /**
+                     * inicia conexao com os dados do Sensor
+                     */
 
-                try {
-                    this.conectarComBluetoohArduino();
-                }catch (Exception e) {
-                    e.printStackTrace();
-                    Toast.makeText(getApplicationContext(), R.string.txt_nao_conectou, Toast.LENGTH_LONG).show();
+                    try {
+                        this.conectarComBluetoohArduino();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Toast.makeText(getApplicationContext(), R.string.txt_nao_conectou, Toast.LENGTH_LONG).show();
+                    }
+
+                    if (conectado) {
+                        Log.d("EU", getString(R.string.txt_status_conectado));
+                        sendMessage(MENSAGEM_ATIVACAO);
+                        beginListenForData();
+                    }
+
+                    //----------------------------------------------------------------------------------
+
+                    Toast.makeText(getApplicationContext(), "SERVIÇO INICIADO", Toast.LENGTH_LONG).show();
+                    updateUI(true);
+
+                    PowerManager mgr = (PowerManager) getSystemService(Context.POWER_SERVICE);
+                    PowerManager.WakeLock wakeLock = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MyWakeLock");
+                    wakeLock.acquire();
+
+                    /**
+                     * Inicializa as funções para savar o log em um arquivo.
+                     */
+                    File f = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "Sensors_log");
+                    Log.d("PATH", f.getAbsolutePath());
+
+                    if (!f.exists()) {
+                        Log.d("MAKE DIR", f.mkdirs() + "");
+                    }
+
+                    fileLogManager = new FileLogManager(spinner2.getSelectedItem().toString());
+                    fileLogManager.criaLogsComTodosSensores();
+                    rotulo = spinner2.getSelectedItem().toString();
+
+                    //Log.d(TAG, "Coleta Iniciada");
+                }else{
+                    Toast.makeText(this, "Verifique a conexão com o Bluetooth", Toast.LENGTH_SHORT).show();
                 }
-
-                if (conectado) {
-                    Log.d("EU", getString(R.string.txt_status_conectado));
-                    sendMessage(MENSAGEM_ATIVACAO);
-                    beginListenForData();
-                }
-
-                //----------------------------------------------------------------------------------
-
-
-                Toast.makeText(getApplicationContext(),"SERVIÇO INICIADO",Toast.LENGTH_LONG).show();
-
-                updateUI(true);
-
-                PowerManager mgr = (PowerManager) getSystemService(Context.POWER_SERVICE);
-                PowerManager.WakeLock wakeLock = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MyWakeLock");
-                wakeLock.acquire();
-
-                /**
-                 * Inicializa as funções para savar o log em um arquivo.
-                 */
-                File f = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "Sensors_log");
-                Log.d("PATH", f.getAbsolutePath());
-
-                if (!f.exists()) {
-                    Log.d("MAKE DIR", f.mkdirs() + "");
-                }
-
-                this.fileLogManager = new FileLogManager(spinner2.getSelectedItem().toString());
-                this.fileLogManager.criaLogsComTodosSensores();
-                rotulo = spinner2.getSelectedItem().toString();
-
-                Log.d(TAG, "Coleta Iniciada");
-
                 break;
             case R.id.stopService:
+                fileLogManager.fechaLogSensor();
                 desconectarBluetoothDoArduino();
 
                 /**
@@ -445,7 +446,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
                 editor.putBoolean("prefAtivo", false);
                 editor.commit();
 
-                Log.d(TAG, "Coleta finalizada.");
+                //Log.d(TAG, "Coleta finalizada.");
 
                 updateUI(false);
 
@@ -467,7 +468,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
                          * - Log.cvs (path)
                          * informações do autor
                          */
-                        Log.d(TAG, "Envio ao servidor desativado.");
+                        //Log.d(TAG, "Envio ao servidor desativado.");
 
                         Dado dado = new Dado(rotulo, nomeArquivo, this);
                         DadoDAO dadoDAO = new DadoDAO(this);

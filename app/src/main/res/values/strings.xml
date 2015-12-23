@@ -20,6 +20,8 @@
         <item>Sentado  - MMA7361</item>
         <item>Parado   - MMA7361</item>
         <item>Correndo - MMA7361</item>
+        <item>Deitado - MMA7361</item>
+        <item>Crise Epiléptica - MMA7361</item>
     </string-array>
     <string name="stopservice">Para Serviço</string>
     <string name="country_prompt">Selecione a ação</string>

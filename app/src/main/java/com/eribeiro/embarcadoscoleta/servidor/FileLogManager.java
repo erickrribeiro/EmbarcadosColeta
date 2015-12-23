@@ -1,14 +1,10 @@
 package com.eribeiro.embarcadoscoleta.servidor;
 
-import android.hardware.Sensor;
 import android.os.Environment;
 import android.util.Log;
-
 import com.eribeiro.embarcadoscoleta.MainActivity;
-
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.Calendar;
 
 /**
@@ -16,17 +12,11 @@ import java.util.Calendar;
  * email: erick.ribeiro.16@gmail.com
  */
 
-
 public class FileLogManager {
-    public static String TAG = "FILE LOG";
     private FileOutputStream arqCompleto;
     private String experimento;
     private String label;
-    private String nomeArquivo;
     private File diretorioCompleto;
-    private String colunas;
-
-    private boolean todosAtivos;
 
     public FileLogManager(String Label){
         this.label = Label;
@@ -53,63 +43,42 @@ public class FileLogManager {
 
 
         try {
-            this.nomeArquivo = label+"_" + experimento + ".csv";
+            String nomeArquivo = label+"_" + experimento + ".csv";
 
-            MainActivity.nomeArquivo = this.nomeArquivo;
+            MainActivity.nomeArquivo = nomeArquivo;
             MainActivity.rotulo = label;
 
-            diretorioCompleto = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM + "/Sensors_log"), this.nomeArquivo);
+            diretorioCompleto = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM + "/Sensors_log"), nomeArquivo);
             arqCompleto = new FileOutputStream(diretorioCompleto, true);
 
-            Log.d(TAG, "Todos os sensores criado com sucesso\n");
+            //Log.d(TAG, "Todos os sensores criado com sucesso\n");
 
-
-            colunas = "x1, y1, z1, orientacao1, x2, y2, z2, orientacao2, Label \n";
+            String colunas = "x1, y1, z1, orientacao1, x2, y2, z2, orientacao2, Label \n";
             arqCompleto.write(colunas.getBytes());
             arqCompleto.flush();
 
         } catch (Exception e) {
             Log.d("ERRO", "erro em criar o arquivo completo: " + e.getMessage());
         }
-
-        this.todosAtivos = true;
     }
 
-    public void insertResolutionAndMaximunRange(Sensor sensor, FileOutputStream outputStream, boolean ativo)throws Exception{
-        if(ativo) {
-            String infoSensor = "Resolution: " + sensor.getResolution() + ", " + "Maximun Range: " + sensor.getMaximumRange() + "\n";
-            outputStream.write(infoSensor.getBytes());
-            outputStream.flush();
-        }
-    }
-    public void insereValoresTodosSensores(String linha)throws IOException{
-        this.arqCompleto.write(linha.getBytes());
-        this.arqCompleto.flush();
-    }
-
-    public void fechaLogComTodosSensores()throws IOException{
-        this.arqCompleto.close();
-    }
-//CRIA ARQUIVO .CSV PARA OS DADOS DO Acelerometro.
-
-
-    public void insereValoresLogSensor(String linha, FileOutputStream outputStream, boolean ativo)throws IOException{
-        if(ativo) {
-            outputStream.write(linha.getBytes());
-            outputStream.flush();
+    public void insereValoresTodosSensores(String linha){
+        try {
+            this.arqCompleto.write(linha.getBytes());
+            this.arqCompleto.flush();
+        }catch (Exception e){
+            Log.d("ERRO", "erro em criar o arquivo completo: " + e.getMessage());
         }
     }
 
-    public void fechaLogSensor(FileOutputStream outputStream, boolean ativo)throws IOException{
-        if(ativo) {
-            outputStream.close();
+
+    public void fechaLogSensor(){
+        try {
+            this.arqCompleto.close();
+        }catch (Exception e){
+            Log.d("ERRO", "erro ao fechar o arquivo completo: " + e.getMessage());
         }
     }
-
-    public boolean isTodosAtivos() {
-        return todosAtivos;
-    }
-
 
 }
 
